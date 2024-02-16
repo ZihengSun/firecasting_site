@@ -69,7 +69,7 @@ function add_wildfire_predicted_geotiff(dateString){
     
     // URL to your GeoTIFF file - firedata_20210717_predicted.txt_output.tif
     var wmslayer = L.tileLayer.wms('http://geobrain.csiss.gmu.edu/cgi-bin/mapserv?'+
-            'map=/var/www/html/wildfire_site/data/firedata__'+formattedDate+'_predicted.txt_output.tif.map&', {
+            'map=/var/www/html/wildfire_site/data/firedata_'+formattedDate+'_predicted.txt_output.tif.map&', {
             layers: 'wildfiremap',
             format: 'image/png',
             transparent: true
