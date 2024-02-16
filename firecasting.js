@@ -60,9 +60,16 @@ function loadMap() {
 
 function add_wildfire_predicted_geotiff(date){
 
+    let date = new Date(dateString);
+    let year = date.getFullYear();
+    let month = String(date.getMonth() + 1).padStart(2, '0');
+    let day = String(date.getDate()).padStart(2, '0');
+
+    let formattedDate = year + month + day;
+    
     // URL to your GeoTIFF file
     var wmslayer = L.tileLayer.wms('http://geobrain.csiss.gmu.edu/cgi-bin/mapserv?'+
-            'map=/var/www/html/wildfire_site/data/wildfire_predicted_'+date+'.tif.map&', {
+            'map=/var/www/html/wildfire_site/data/wildfire_predicted_'+formattedDate+'.tif.map&', {
             layers: 'wildfiremap',
             format: 'image/png',
             transparent: true
