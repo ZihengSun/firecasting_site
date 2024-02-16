@@ -58,7 +58,7 @@ function loadMap() {
     map.fitBounds(usaBounds);
 }
 
-function add_wildfire_predicted_geotiff(date){
+function add_wildfire_predicted_geotiff(dateString){
 
     let dateobj = new Date(dateString);
     let year = dateobj.getFullYear();
@@ -75,7 +75,7 @@ function add_wildfire_predicted_geotiff(date){
             transparent: true
     });
     wmslayer.addTo(map);
-    layercontrol.addOverlay(wmslayer, "Predicted Wildfire "+date);
+    layercontrol.addOverlay(wmslayer, "Predicted Wildfire "+dateString);
 
 }
 
