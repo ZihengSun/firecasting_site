@@ -108,7 +108,7 @@ function findLatestDate(dates) {
 
 function refresh_calendar(){
   // Fetch the CSV file
-  fetch('../wildfire_site/date_list.csv', {
+  fetch('../wildfire_site/data/date_list.csv', {
     method: 'GET',
     cache: 'no-store', // 'no-store' disables caching
   })
