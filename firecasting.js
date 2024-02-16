@@ -62,7 +62,7 @@ function add_wildfire_predicted_geotiff(date){
 
     // URL to your GeoTIFF file
     var wmslayer = L.tileLayer.wms('http://geobrain.csiss.gmu.edu/cgi-bin/mapserv?'+
-            'map=/var/www/html/wildfire_site/map/wildfire_predicted_'+date+'.tif.map&', {
+            'map=/var/www/html/wildfire_site/data/wildfire_predicted_'+date+'.tif.map&', {
             layers: 'wildfiremap',
             format: 'image/png',
             transparent: true
