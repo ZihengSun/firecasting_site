@@ -88,6 +88,8 @@ function add_wildfire_predicted_geotiff(eyedate, predict_dateString){
 
 dateArray_for_picker1 = []
 dateArray_for_picker2 = []
+latest_date_for_picker1 = ""
+latest_date_for_picker2 = ""
 
 function setup_datepicker2(){
     $('#datepicker2').datepicker({
@@ -162,14 +164,13 @@ function refresh_calendar2(eye_date){
                         return row.date;
                     });
                     console.log("dateArray_for_picker2 = " + dateArray_for_picker2)
-                    setup_datepicker2()
-                    setup_datepicker1()
+                    
                     
                     // found the latest date and show on the map
                     var latestdate = findLatestDate(dateArray_for_picker2)
                     console.log("Found latest date is " + latestdate + " setting picker 2 to it")
                     $('#datepicker2').datepicker('setDate', new Date(latestdate));
-                    $('#datepicker2').trigger('change');
+                    $('#datepicker2').datepicker('update');
                     console.log("current eye date is " + eye_date)
                     add_wildfire_predicted_geotiff(eye_date, latestdate)
                 }
@@ -200,15 +201,23 @@ function refresh_calendar(){
                 });
                 console.log("dateArray_for_picker1 = " + dateArray_for_picker1)
                 
-                // Initialize Bootstrap Datepicker with the dateArray
-                setup_datepicker1()
-                setup_datepicker2()
+                $('#datepicker1').datepicker({
+                    beforeShowDay: function(date) {
+                        // Convert date to yyyy-mm-dd format
+                        var formattedDate = date.getFullYear() + '-' + 
+                            ('0' + (date.getMonth() + 1)).slice(-2) + '-' + 
+                            ('0' + date.getDate()).slice(-2);
+            
+                        // Check if the date is in the dateArray
+                        return dateArray_for_picker1.includes(formattedDate);
+                    }
+                });
 
                 // found the latest date and show on the map
                 var latestdate = findLatestDate(dateArray_for_picker1)
                 console.log("Found latest eye date is " + latestdate + "setting picker1 to it")
                 $('#datepicker1').datepicker('setDate', new Date(latestdate));
-                $('#datepicker1').trigger('change');
+                $('#datepicker1').datepicker('update');
                 refresh_calendar2(latestdate)
             }
         });
@@ -323,6 +332,8 @@ function add_legend(){
 // Automatically load the map when the document is ready
 document.addEventListener('DOMContentLoaded', function() {
     loadMap();
+    setup_datepicker2()
+    setup_datepicker1()
     refresh_calendar()
     add_listener_to_buttons()
     add_legend()
