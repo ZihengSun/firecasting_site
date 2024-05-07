@@ -145,10 +145,31 @@ function findLatestDate(dates) {
     return latestDate;
 }
 
+function remove_dash_in_date_str(originalDate){
+
+    // Original date string
+    // var originalDate = "2021-08-11";
+
+    // Parse the original date string into a Date object
+    var date = new Date(originalDate);
+
+    // Get the year, month, and day components
+    var year = date.getFullYear();
+    var month = ('0' + (date.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-indexed
+    var day = ('0' + date.getDate()).slice(-2);
+
+    // Reformat the date string
+    var reformattedDate = year + month + day;
+
+    //console.log(reformattedDate); // Output: 20210811
+    return reformattedDate
+}
+
 function refresh_calendar2(eye_date){
-    console.log("start to refresh calendar 2 ../wildfire_site/data/"+eye_date+"/date_list.csv")
+    reformat_eye_date_str = remove_dash_in_date_str(eye_date)
+    console.log("start to refresh calendar 2 ../wildfire_site/data/"+reformat_eye_date_str+"/date_list.csv")
     
-    fetch('../wildfire_site/data/'+eye_date+'/date_list.csv', {
+    fetch('../wildfire_site/data/'+reformat_eye_date_str+'/date_list.csv', {
         method: 'GET',
         cache: 'no-store', // 'no-store' disables caching
       })
@@ -164,15 +185,14 @@ function refresh_calendar2(eye_date){
                         return row.date;
                     });
                     console.log("dateArray_for_picker2 = " + dateArray_for_picker2)
-                    
+                    setup_datepicker2()
                     
                     // found the latest date and show on the map
                     var latestdate = findLatestDate(dateArray_for_picker2)
                     console.log("Found latest date is " + latestdate + " setting picker 2 to it")
                     $('#datepicker2').datepicker('setDate', new Date(latestdate));
-                    $('#datepicker2').datepicker('update');
                     console.log("current eye date is " + eye_date)
-                    add_wildfire_predicted_geotiff(eye_date, latestdate)
+                    add_wildfire_predicted_geotiff(reformat_eye_date_str, latestdate)
                 }
             });
     
