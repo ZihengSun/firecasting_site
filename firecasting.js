@@ -9,8 +9,6 @@ function parse_date_string(str) {
 var map, layercontrol;
 
 function loadMap() {
-    // Get selected dates from datepicker
-    var selectedDates = document.getElementById('datepicker').value.split(',');
     
     // Get the Leaflet map container
     map = L.map('map').setView([0, 0], 2);
