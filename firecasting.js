@@ -162,6 +162,7 @@ function refresh_calendar2(eye_date){
                     });
                     console.log("dateArray_for_picker2 = " + dateArray_for_picker2)
                     setup_datepicker2()
+                    setup_datepicker1()
                     
                     // found the latest date and show on the map
                     var latestdate = findLatestDate(dateArray_for_picker2)
@@ -199,7 +200,6 @@ function refresh_calendar(){
                 
                 // Initialize Bootstrap Datepicker with the dateArray
                 setup_datepicker1()
-                // Initialize Bootstrap Datepicker with the dateArray
                 setup_datepicker2()
 
                 // found the latest date and show on the map
