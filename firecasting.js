@@ -85,7 +85,10 @@ function add_wildfire_predicted_geotiff(eyedate, predict_dateString){
 
 }
 
-function setup_datepicker2(dateArray){
+dateArray_for_picker1 = []
+dateArray_for_picker2 = []
+
+function setup_datepicker2(){
     $('#datepicker2').datepicker({
         format: 'yyyy-mm-dd',
         todayHighlight: true,
@@ -98,12 +101,12 @@ function setup_datepicker2(dateArray){
                 ('0' + date.getDate()).slice(-2);
 
             // Check if the date is in the dateArray
-            return dateArray.includes(formattedDate);
+            return dateArray_for_picker2.includes(formattedDate);
         }
     });
 }
 
-function setup_datepicker1(dateArray){
+function setup_datepicker1(){
     $('#datepicker1').datepicker({
         format: 'yyyy-mm-dd',
         todayHighlight: true,
@@ -116,7 +119,7 @@ function setup_datepicker1(dateArray){
                 ('0' + date.getDate()).slice(-2);
 
             // Check if the date is in the dateArray
-            return dateArray.includes(formattedDate);
+            return dateArray_for_picker1.includes(formattedDate);
         }
     });
 
@@ -141,6 +144,7 @@ function findLatestDate(dates) {
 
 function refresh_calendar2(eye_date){
     console.log("start to refresh calendar 2 ../wildfire_site/data/"+eye_date+"/date_list.csv")
+    
     fetch('../wildfire_site/data/'+eye_date+'/date_list.csv', {
         method: 'GET',
         cache: 'no-store', // 'no-store' disables caching
@@ -153,16 +157,14 @@ function refresh_calendar2(eye_date){
                 header: true,
                 complete: function(results) {
                     // Assuming 'date' is the name of your date column
-                    var dateArray = results.data.map(function(row) {
+                    dateArray_for_picker2 = results.data.map(function(row) {
                         return row.date;
                     });
-                    console.log("dateArray = " + dateArray)
-    
-                    // Initialize Bootstrap Datepicker with the dateArray
-                    setup_datepicker2(dateArray)
-    
+                    console.log("dateArray_for_picker2 = " + dateArray_for_picker2)
+                    setup_datepicker2()
+                    
                     // found the latest date and show on the map
-                    var latestdate = findLatestDate(dateArray)
+                    var latestdate = findLatestDate(dateArray_for_picker2)
                     console.log("Found latest date is " + latestdate + " setting picker 2 to it")
                     $('#datepicker2').datepicker('setDate', new Date(latestdate));
                     console.log("current eye date is " + eye_date)
@@ -176,6 +178,7 @@ function refresh_calendar2(eye_date){
 }
 
 function refresh_calendar(){
+
   // Fetch the CSV file
   fetch('../wildfire_site/data/eye_date_list.csv', {
     method: 'GET',
@@ -189,16 +192,18 @@ function refresh_calendar(){
             header: true,
             complete: function(results) {
                 // Assuming 'date' is the name of your date column
-                var dateArray = results.data.map(function(row) {
+                dateArray_for_picker1 = results.data.map(function(row) {
                     return row.date;
                 });
-                console.log("dateArray = " + dateArray)
-
+                console.log("dateArray_for_picker1 = " + dateArray_for_picker1)
+                
                 // Initialize Bootstrap Datepicker with the dateArray
-                setup_datepicker1(dateArray)
+                setup_datepicker1()
+                // Initialize Bootstrap Datepicker with the dateArray
+                setup_datepicker2()
 
                 // found the latest date and show on the map
-                var latestdate = findLatestDate(dateArray)
+                var latestdate = findLatestDate(dateArray_for_picker1)
                 console.log("Found latest eye date is " + latestdate + "setting picker1 to it")
                 $('#datepicker1').datepicker('setDate', new Date(latestdate));
                 refresh_calendar2(latestdate)
