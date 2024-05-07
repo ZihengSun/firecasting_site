@@ -81,7 +81,7 @@ function add_wildfire_predicted_geotiff(eyedate, predict_dateString){
                     transparent: true
             });
     wmslayer.addTo(map);
-    layercontrol.addOverlay(wmslayer, "Wildfire Prediction "+ eyedate +" - "+predict_dateString);
+    layercontrol.addOverlay(wmslayer, "Wildfire Prediction "+ eye_formattedDate +" - "+predict_dateString);
 
 }
 
@@ -163,7 +163,7 @@ function refresh_calendar2(eye_date){
     
                     // found the latest date and show on the map
                     var latestdate = findLatestDate(dateArray)
-                    console.log("Found latest date is " + latestdate)
+                    console.log("Found latest date is " + latestdate + " setting picker 2 to it")
                     $('#datepicker2').datepicker('setDate', new Date(latestdate));
                     add_wildfire_predicted_geotiff(eye_date, latestdate)
                 }
@@ -198,7 +198,7 @@ function refresh_calendar(){
 
                 // found the latest date and show on the map
                 var latestdate = findLatestDate(dateArray)
-                console.log("Found latest date is " + latestdate)
+                console.log("Found latest eye date is " + latestdate + "setting picker1 to it")
                 $('#datepicker1').datepicker('setDate', new Date(latestdate));
                 refresh_calendar2(latestdate)
             }
