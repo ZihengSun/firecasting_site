@@ -165,6 +165,7 @@ function refresh_calendar2(eye_date){
                     var latestdate = findLatestDate(dateArray)
                     console.log("Found latest date is " + latestdate + " setting picker 2 to it")
                     $('#datepicker2').datepicker('setDate', new Date(latestdate));
+                    console.log("current eye date is " + eye_date)
                     add_wildfire_predicted_geotiff(eye_date, latestdate)
                 }
             });
