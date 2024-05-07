@@ -58,29 +58,36 @@ function loadMap() {
     map.fitBounds(usaBounds);
 }
 
-function add_wildfire_predicted_geotiff(dateString){
-
+function convert_date_str(dateString){
     let dateobj = new Date(dateString);
     let year = dateobj.getFullYear();
     let month = String(dateobj.getMonth() + 1).padStart(2, '0');
     let day = String(dateobj.getDate()).padStart(2, '0');
 
     let formattedDate = year + month + day;
+    return formattedDate
+}
+
+function add_wildfire_predicted_geotiff(eyedate, predict_dateString){
+    let eye_formattedDate = convert_date_str(eyedate)
+    let predict_formattedDate = convert_date_str(predict_dateString)
     
     // URL to your GeoTIFF file - firedata_20210717_predicted.txt_output.tif
     var wmslayer = L.tileLayer.wms('http://geobrain.csiss.gmu.edu/cgi-bin/mapserv?'+
-            'map=/var/www/html/wildfire_site/data/firedata_'+formattedDate+'_predicted.txt_output.tif.map&', {
-            layers: 'wildfiremap',
-            format: 'image/png',
-            transparent: true
-    });
+            'map=/var/www/html/wildfire_site/data/'+eye_formattedDate+'firedata_'+
+            predict_formattedDate+'_predicted.txt_output.tif.map&', 
+            {
+                    layers: 'wildfiremap',
+                    format: 'image/png',
+                    transparent: true
+            });
     wmslayer.addTo(map);
-    layercontrol.addOverlay(wmslayer, "Predicted Wildfire "+dateString);
+    layercontrol.addOverlay(wmslayer, "Wildfire Prediction "+ eyedate +" - "+dateString);
 
 }
 
-function setup_datepicker(dateArray){
-    $('#datepicker').datepicker({
+function setup_datepicker2(dateArray){
+    $('#datepicker2').datepicker({
         format: 'yyyy-mm-dd',
         todayHighlight: true,
         timeZone: 'America/Los_Angeles',
@@ -95,6 +102,26 @@ function setup_datepicker(dateArray){
             return dateArray.includes(formattedDate);
         }
     });
+}
+
+function setup_datepicker1(dateArray){
+    $('#datepicker1').datepicker({
+        format: 'yyyy-mm-dd',
+        todayHighlight: true,
+        timeZone: 'America/Los_Angeles',
+        autoclose: true,
+        beforeShowDay: function(date) {
+            // Convert date to yyyy-mm-dd format
+            var formattedDate = date.getFullYear() + '-' + 
+                ('0' + (date.getMonth() + 1)).slice(-2) + '-' + 
+                ('0' + date.getDate()).slice(-2);
+
+            // Check if the date is in the dateArray
+            return dateArray.includes(formattedDate);
+        }
+    });
+
+    
 }
 
 // Function to find the latest date
@@ -113,9 +140,43 @@ function findLatestDate(dates) {
     return latestDate;
 }
 
+function refresh_calendar2(eye_date){
+    fetch('../wildfire_site/data/'+eye_date+'/date_list.csv', {
+        method: 'GET',
+        cache: 'no-store', // 'no-store' disables caching
+      })
+        .then(response => response.text())
+        .then(data => {
+            console.log(data)
+            // Parse CSV data and convert the date column into an array
+            Papa.parse(data, {
+                header: true,
+                complete: function(results) {
+                    // Assuming 'date' is the name of your date column
+                    var dateArray = results.data.map(function(row) {
+                        return row.date;
+                    });
+                    console.log("dateArray = " + dateArray)
+    
+                    // Initialize Bootstrap Datepicker with the dateArray
+                    setup_datepicker2(dateArray)
+    
+                    // found the latest date and show on the map
+                    var latestdate = findLatestDate(dateArray)
+                    console.log("Found latest date is " + latestdate)
+                    $('#datepicker2').datepicker('setDate', new Date(latestdate));
+                    add_wildfire_predicted_geotiff(eye_date, latestdate)
+                }
+            });
+    
+        })
+        .catch(error => console.error('Error fetching CSV file:', error));
+    
+}
+
 function refresh_calendar(){
   // Fetch the CSV file
-  fetch('../wildfire_site/data/date_list.csv', {
+  fetch('../wildfire_site/data/eye_date_list.csv', {
     method: 'GET',
     cache: 'no-store', // 'no-store' disables caching
   })
@@ -133,13 +194,13 @@ function refresh_calendar(){
                 console.log("dateArray = " + dateArray)
 
                 // Initialize Bootstrap Datepicker with the dateArray
-                setup_datepicker(dateArray)
+                setup_datepicker1(dateArray)
 
                 // found the latest date and show on the map
                 var latestdate = findLatestDate(dateArray)
                 console.log("Found latest date is " + latestdate)
-                $('#datepicker').datepicker('setDate', new Date(latestdate));
-                add_wildfire_predicted_geotiff(latestdate)
+                $('#datepicker1').datepicker('setDate', new Date(latestdate));
+                refresh_calendar2(latestdate)
             }
         });
 
@@ -155,19 +216,21 @@ function add_listener_to_buttons(){
     // Button click listener
     $('#load_wildfire_to_map').on('click', function() {
         // Get the selected date from the datepicker
-        var selectedDate = $('#datepicker').datepicker('getFormattedDate');
+        var eyeDate = $('#datepicker1').datepicker('getFormattedDate');
+        var selectedDate = $('#datepicker2').datepicker('getFormattedDate');
         console.log("loading layer for "+ selectedDate)
         // Show overlay with selected date
-        add_wildfire_predicted_geotiff(selectedDate);
+        add_wildfire_predicted_geotiff(eyeDate, selectedDate);
     });
 
     // Close overlay button click listener
     $('#download_wildfire_geotiff').on('click', function() {
         // Create a temporary anchor element
-        var selectedDate = $('#datepicker').datepicker('getFormattedDate');
+        var eyeDate = $('#datepicker1').datepicker('getFormattedDate');
+        var selectedDate = $('#datepicker2').datepicker('getFormattedDate');
         console.log("downloading geotiff for "+ selectedDate)
         // Open a new window to initiate the download
-        window.open("../wildfire_site/output/wildfire_predicted_"+selectedDate+".tif", '_blank');
+        window.open("../wildfire_site/output/"+eyeDate+"/wildfire_predicted_"+selectedDate+".tif", '_blank');
     });
 
 }
