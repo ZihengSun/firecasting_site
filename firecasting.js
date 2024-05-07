@@ -202,6 +202,16 @@ function refresh_calendar2(eye_date){
 }
 
 function refresh_calendar(){
+    $('#datepicker1').datepicker().on("changeDate", function(selected) {
+        var startDate = new Date(selected.date.valueOf());
+        var year = startDate.getFullYear();
+        var month = ('0' + (startDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-indexed
+        var day = ('0' + startDate.getDate()).slice(-2);
+
+        // Reformat the date string
+        var eyedate_str = year + "-"+ month + "-"+ day;
+        refresh_calendar2(eyedate_str)
+    });
 
   // Fetch the CSV file
   fetch('../wildfire_site/data/eye_date_list.csv', {
