@@ -210,6 +210,7 @@ function refresh_calendar2(eye_date){
 
 function get_date_str_with_dash(date_str_with_dash){
     var startDate = new Date(date_str_with_dash);
+    startDate.setDate(startDate.getDate() + 1);
     var year = startDate.getFullYear();
     var month = ('0' + (startDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-indexed
     var day = ('0' + startDate.getDate()).slice(-2);
