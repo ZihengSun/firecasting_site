@@ -72,12 +72,15 @@ function add_wildfire_predicted_geotiff(eyedate, predict_dateString){
         // Remove dashes from the original date string
         eyedate = eyedate.replace(/-/g, '');
     }
-    let predict_formattedDate = convert_date_str(predict_dateString)
+    if (predict_dateString.includes('-')) {
+        // Remove dashes from the original date string
+        predict_dateString = predict_dateString.replace(/-/g, '');
+    }
     
     // URL to your GeoTIFF file - firedata_20210717_predicted.txt_output.tif
     var wmslayer = L.tileLayer.wms('http://geobrain.csiss.gmu.edu/cgi-bin/mapserv?'+
             'map=/var/www/html/wildfire_site/data/'+eyedate+'/firedata_'+
-            predict_formattedDate+'_predicted.txt_output.tif.map&', 
+            predict_dateString+'_predicted.txt_output.tif.map&', 
             {
                     layers: 'wildfiremap',
                     format: 'image/png',
