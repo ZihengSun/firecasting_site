@@ -68,6 +68,10 @@ function convert_date_str(dateString){
 
 function add_wildfire_predicted_geotiff(eyedate, predict_dateString){
     console.log("adding the layer of prediction of "+predict_dateString + "from eye date "+eyedate)
+    if (eyedate.includes('-')) {
+        // Remove dashes from the original date string
+        eyedate = eyedate.replace(/-/g, '');
+    }
     let predict_formattedDate = convert_date_str(predict_dateString)
     
     // URL to your GeoTIFF file - firedata_20210717_predicted.txt_output.tif
@@ -201,15 +205,20 @@ function refresh_calendar2(eye_date){
     
 }
 
+function get_date_str_with_dash(date_str_with_dash){
+    var startDate = new Date(date_str_with_dash);
+    var year = startDate.getFullYear();
+    var month = ('0' + (startDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-indexed
+    var day = ('0' + startDate.getDate()).slice(-2);
+
+    // Reformat the date string
+    var eyedate_str = year + "-" + month + "-" + day;
+    return eyedate_str
+}
+
 function refresh_calendar(){
     $('#datepicker1').datepicker().on("changeDate", function(selected) {
-        var startDate = new Date(selected.date.valueOf());
-        var year = startDate.getFullYear();
-        var month = ('0' + (startDate.getMonth() + 1)).slice(-2); // Adding 1 because months are zero-indexed
-        var day = ('0' + startDate.getDate()).slice(-2);
-
-        // Reformat the date string
-        var eyedate_str = year + "-"+ month + "-"+ day;
+        let eyedate_str = get_date_str_with_dash(selected.date.valueOf())
         refresh_calendar2(eyedate_str)
     });
 
