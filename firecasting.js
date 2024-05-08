@@ -202,6 +202,10 @@ function refresh_calendar2(eye_date){
                     dateArray_for_picker2 = results.data.map(function(row) {
                         return row.date;
                     });
+                    if (dateArray_for_picker2.length === 0) {
+                        console.log("dateArray_for_picker2 is empty");
+                        return;
+                    }
                     console.log("dateArray_for_picker2 = " + dateArray_for_picker2)
                     setup_datepicker2()
                     
@@ -253,6 +257,10 @@ function refresh_calendar(){
                 dateArray_for_picker1 = results.data.map(function(row) {
                     return row.date;
                 });
+                if (dateArray_for_picker1.length === 0) {
+                    console.log("dateArray_for_picker1 is empty");
+                    return;
+                }
                 console.log("dateArray_for_picker1 = " + dateArray_for_picker1)
                 
                 $('#datepicker1').datepicker({
