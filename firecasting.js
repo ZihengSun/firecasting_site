@@ -78,6 +78,9 @@ function convert_date_str(dateString){
 }
 
 function add_wildfire_predicted_geotiff(eyedate, predict_dateString){
+    if (!predict_dateString) {
+        return;
+    }
     console.log("adding the layer of prediction of "+predict_dateString + "from eye date "+eyedate)
     if (eyedate.includes('-')) {
         // Remove dashes from the original date string
