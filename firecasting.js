@@ -20,15 +20,7 @@ function loadMap() {
         }),
 
         Places: L.tileLayer.wms('http://ows.mundialis.de/services/service?', {
-            layers: 'OSM-Overlay-WMS'
-        }),
-
-        'Topography, then places': L.tileLayer.wms('http://ows.mundialis.de/services/service?', {
-            layers: 'TOPO-WMS,OSM-Overlay-WMS'
-        }),
-
-        'Places, then topography': L.tileLayer.wms('http://ows.mundialis.de/services/service?', {
-            layers: 'OSM-Overlay-WMS,TOPO-WMS'
+            layers: 'OSM-WMS'
         }),
 
         'SatelliteImagery': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/'+
@@ -54,6 +46,25 @@ function loadMap() {
 
     // Fit the map to the bounding box
     map.fitBounds(usaBounds);
+
+    fetch('us-states.json').then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        // Add the county boundaries layer to the map
+        var geojsonStyle = {
+            color: '#000000', // Red color
+            weight: 1 // Line width
+        };
+
+        // Add the county boundaries layer to the map with custom style
+        var geojsonLayer = L.geoJSON(data, {
+            style: geojsonStyle
+        });
+        geojsonLayer.addTo(map);
+        geojsonLayer.bringToFront(); // Bring the GeoJSON layer to the top
+        layercontrol.addOverlay(wmslayer, "Predicted SWE "+date);
+    });
 }
 
 function convert_date_str(dateString){
