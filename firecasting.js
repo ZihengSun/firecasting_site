@@ -373,6 +373,7 @@ function add_legend(){
         var div = L.DomUtil.create('div', 'info legend'),
             labels = [];
 
+        div.style.backgroundColor = 'white';
         // Specify the number of classes (baskets)
         var numClasses = 10;
         
