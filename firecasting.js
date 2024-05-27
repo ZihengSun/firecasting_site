@@ -374,6 +374,7 @@ function add_legend(){
             labels = [];
 
         div.style.backgroundColor = 'white';
+        div.style.padding = '10px';
         // Specify the number of classes (baskets)
         var numClasses = 10;
         
