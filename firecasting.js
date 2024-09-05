@@ -313,7 +313,7 @@ function add_listener_to_buttons(){
         var selectedDate = $('#datepicker2').datepicker('getFormattedDate');
         console.log("downloading geotiff for "+ selectedDate)
         // Open a new window to initiate the download
-        window.open("../wildfire_site/output/"+eyeDate+"/wildfire_predicted_"+selectedDate+".tif", '_blank');
+        window.open("../wildfire_site/data/"+eyeDate+"/firedata_"+selectedDate+"_predicted.txt_output.tif", '_blank');
     });
 
 }
