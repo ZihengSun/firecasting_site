@@ -312,8 +312,9 @@ function add_listener_to_buttons(){
         var eyeDate = $('#datepicker1').datepicker('getFormattedDate');
         var selectedDate = $('#datepicker2').datepicker('getFormattedDate');
         console.log("downloading geotiff for "+ selectedDate)
+        no_dash_date = remove_dash_in_date_str(eyeDate)
         // Open a new window to initiate the download
-        window.open("../wildfire_site/data/"+eyeDate+"/firedata_"+selectedDate+"_predicted.txt_output.tif", '_blank');
+        window.open("../wildfire_site/data/"+no_dash_date+"/firedata_"+no_dash_date+"_predicted.txt_output.tif", '_blank');
     });
 
 }
