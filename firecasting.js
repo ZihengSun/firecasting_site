@@ -343,16 +343,14 @@ function getColor(d) {
     // console.log(colorScale)
 
     // Define color classes
-    var colors = ['#FFFFFF', '#FFCCCC', '#FF9999', '#FF6666', '#FF3333', 
-        '#FF0000', '#CC0000', '#990000', '#660000', '#330000']
+    var colors = ['#FFFFFF', '#FFEBAF', '#FFC864', '#FF9632', '#FF6400', 
+        '#C80000', '#8B0000',]
 
     // Specify the number of classes (baskets)
-    var numClasses = 10;
+    var numClasses = 7;
 
     // Generate grades dynamically based on the number of classes
-    var grades = Array.from({ length: numClasses + 1 }, function (_, index) {
-        return (300 / numClasses) * index;
-    });
+    var grades = [20, 50, 100, 150, 200, 300, 500]
 
     // Find the appropriate color class based on the input value
     for (var i = 0; i < grades.length - 1; i++) {
@@ -380,9 +378,7 @@ function add_legend(){
         var numClasses = 10;
         
         // Generate grades dynamically based on the number of classes
-        var grades = Array.from({ length: numClasses + 1 }, function(_, index) {
-            return (300 / numClasses) * index;
-        });
+        var grades = [20, 50, 100, 150, 200, 300, 500]
 
         // loop through our density intervals and generate a label with a colored square for each interval
         for (var i = 0; i < grades.length; i++) {
