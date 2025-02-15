@@ -25,25 +25,27 @@
         /* Header container (small and top-fixed) */
         #content {
             position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 10px; /* Adjust to ensure it's visible */
+            left: 10px;
             z-index: 2000;
-            width: auto;
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.9); /* Slight transparency */
+            padding: 10px 20px;
             border-radius: 8px;
-            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
         /* Hide H1 and make everything compact */
         h1 {
-            display: none;
+            color: #333;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
         }
+        
 
         /* Labels */
         label {
@@ -125,13 +127,20 @@
 <body>
     <div id="content">
         <h1>Firecasting Mapper</h1>
-        <label for="datepicker1">Select Eye Date:</label>
-        <input type="text" id="datepicker1" autocomplete="off" autocorrect="off" spellcheck="false">
-        <label for="datepicker2">Select Prediction Date:</label>
-        <input type="text" id="datepicker2" autocomplete="off" autocorrect="off" spellcheck="false">
-        <button id="load_wildfire_to_map" >Load</button>
-        <button id="download_wildfire_geotiff" >Download (GTiff)</button>
+        <div class="toolbar">
+            <label for="datepicker1">Select Eye Date:</label>
+            <input type="text" id="datepicker1" autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div class="toolbar">
+            <label for="datepicker2">Select Prediction Date:</label>
+            <input type="text" id="datepicker2" autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div class="toolbar">
+            <button id="load_wildfire_to_map">Load</button>
+            <button id="download_wildfire_geotiff">Download (GTiff)</button>
+        </div>
     </div>
+    
     <div id="map"></div>
     <!--<div id="map-controls"></div>-->
     <!-- Leaflet JS -->
