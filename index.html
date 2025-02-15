@@ -13,11 +13,84 @@
 
     <!-- Your CSS styles -->
     <style>
+
+        /* Background and container styles */
         body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             margin: 0;
-            overflow: hidden;
+            padding: 0;
         }
 
+        /* Header container (small and top-fixed) */
+        #content {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            width: auto;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Hide H1 and make everything compact */
+        h1 {
+            display: none;
+        }
+
+        /* Labels */
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Date picker fields */
+        input[type="text"] {
+            width: 110px;
+            padding: 4px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Buttons */
+        button {
+            padding: 6px 10px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s ease-in-out;
+        }
+
+        #load_wildfire_to_map {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #load_wildfire_to_map:hover {
+            background-color: #0056b3;
+        }
+
+        #download_wildfire_geotiff {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #download_wildfire_geotiff:hover {
+            background-color: #1e7e34;
+        }
+
+        /* Full-screen map */
         #map {
             position: absolute;
             top: 0;
@@ -26,22 +99,15 @@
             height: 100vh;
         }
 
-        #content {
-            position: absolute;
-            top: 20px; /* Adjust the top position as needed */
-            left: 20px; /* Adjust the left position as needed */
-            z-index: 1000; /* Ensure it's above the map */
-        }
-
-        h1, label, input, button {
-            margin-bottom: 10px;
-        }
-
+        /* Legend box */
         .legend {
             line-height: 18px;
             color: #555;
             background-color: aliceblue;
+            padding: 5px;
+            border-radius: 5px;
         }
+
         .legend i {
             width: 18px;
             height: 18px;
@@ -49,17 +115,22 @@
             margin-right: 8px;
             opacity: 0.7;
         }
+
+        input:-webkit-autofill {
+            background-color: white !important;
+            box-shadow: 0 0 0 1000px white inset !important;
+        }
     </style>
 </head>
 <body>
     <div id="content">
         <h1>Firecasting Mapper</h1>
         <label for="datepicker1">Select Eye Date:</label>
-        <input type="text" id="datepicker1">
+        <input type="text" id="datepicker1" autocomplete="off" autocorrect="off" spellcheck="false">
         <label for="datepicker2">Select Prediction Date:</label>
-        <input type="text" id="datepicker2">
-        <button id="load_wildfire_to_map" >Load Wildfire Prediciton to Map</button>
-        <button id="download_wildfire_geotiff" >Download Wildfire Prediciton (GeoTiff)</button>
+        <input type="text" id="datepicker2" autocomplete="off" autocorrect="off" spellcheck="false">
+        <button id="load_wildfire_to_map" >Load</button>
+        <button id="download_wildfire_geotiff" >Download (GTiff)</button>
     </div>
     <div id="map"></div>
     <!--<div id="map-controls"></div>-->

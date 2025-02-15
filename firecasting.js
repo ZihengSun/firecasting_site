@@ -11,7 +11,7 @@ var map, layercontrol;
 function loadMap() {
     
     // Get the Leaflet map container
-    map = L.map('map').setView([0, 0], 2);
+    map = L.map('map',  { zoomControl: false }).setView([0, 0], 2);
 
     var basemaps = {
         
