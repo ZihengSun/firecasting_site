@@ -81,7 +81,7 @@ function add_wildfire_predicted_geotiff(eyedate, predict_dateString){
     if (!predict_dateString) {
         return;
     }
-    console.log("adding the layer of prediction of "+predict_dateString + "from eye date "+eyedate)
+    console.log("adding the layer of prediction of "+predict_dateString + "from base date "+eyedate)
     if (eyedate.includes('-')) {
         // Remove dashes from the original date string
         eyedate = eyedate.replace(/-/g, '');
@@ -112,9 +112,9 @@ dateArray_for_picker2 = []
 latest_date_for_picker1 = ""
 latest_date_for_picker2 = ""
 
-function setup_datepicker2(){
+function setup_datepicker2(dateArray_for_picker2=[], latest_date_for_picker2=null){
     $('#datepicker2').datepicker({
-        format: 'yyyy-mm-dd',
+        format: 'yyyy/mm/dd',
         todayHighlight: true,
         timeZone: 'America/Los_Angeles',
         autoclose: true,
@@ -130,25 +130,72 @@ function setup_datepicker2(){
     });
 }
 
-function setup_datepicker1(){
-    $('#datepicker1').datepicker({
-        format: 'yyyy-mm-dd',
+function setup_datepicker(datepicker_id, dateArray_for_picker=[], latest_date_for_picker=null) {
+
+    $("#" + datepicker_id).datepicker('destroy');
+
+    $("#" + datepicker_id).datepicker({
+        format: 'yyyy/mm/dd',  // Updated format to yyyy-mm-dd
         todayHighlight: true,
-        timeZone: 'America/Los_Angeles',
         autoclose: true,
         beforeShowDay: function(date) {
-            // Convert date to yyyy-mm-dd format
-            var formattedDate = date.getFullYear() + '-' + 
-                ('0' + (date.getMonth() + 1)).slice(-2) + '-' + 
+            if (!Array.isArray(dateArray_for_picker)) {
+                console.error("dateArray_for_picker is not an array:", dateArray_for_picker);
+                return [true]; // Default to selectable if it's not an array
+            }
+
+            // Convert date to yyyy-mm-dd format for comparison
+            var formattedDate = date.getFullYear() + 
+                ('0' + (date.getMonth() + 1)).slice(-2) + 
                 ('0' + date.getDate()).slice(-2);
 
-            // Check if the date is in the dateArray
-            return dateArray_for_picker1.includes(formattedDate);
+            // Check if the formatted date is in the dateArray
+            let isin = dateArray_for_picker.includes(formattedDate);
+            if(isin)
+                console.log("Found date turned on" + formattedDate)
+            return isin
         }
+    }).on("changeDate", function(e) {
+        $(this).datepicker('hide'); // Force close after selecting a date
     });
 
-    
+    // Set the latest date as the default value
+    if (latest_date_for_picker) {
+        console.log("Setting " + datepicker_id + " to " + latest_date_for_picker);
+
+        // Convert latest_date_for_picker from yyyymmdd to yyyy-mm-dd format
+        var formattedLatestDate = latest_date_for_picker.slice(0, 4) + '/' + 
+                                  latest_date_for_picker.slice(4, 6) + '/' + 
+                                  latest_date_for_picker.slice(6, 8);
+
+        // Convert to Date object and set the date
+        var latestDateObject = new Date(formattedLatestDate);
+        if (!isNaN(latestDateObject)) {
+            $("#" + datepicker_id).datepicker('setDate', latestDateObject);
+        } else {
+            console.error('Invalid date format:', latest_date_for_picker);
+        }
+    } else {
+        // If no latest date is provided, set the last date in the array as the default value
+        if (dateArray_for_picker.length > 0) {
+            var lastDate = dateArray_for_picker[dateArray_for_picker.length - 1];
+
+            // Convert lastDate from yyyymmdd to yyyy-mm-dd format
+            var formattedLastDate = lastDate.slice(0, 4) + '/' + 
+                                    lastDate.slice(4, 6) + '/' + 
+                                    lastDate.slice(6, 8);
+
+            // Convert to Date object and set the date
+            var lastDateObject = new Date(formattedLastDate);
+            if (!isNaN(lastDateObject)) {
+                $("#" + datepicker_id).datepicker('setDate', lastDateObject);
+            } else {
+                console.error('Invalid last date format:', lastDate);
+            }
+        }
+    }
 }
+
 
 // Function to find the latest date
 function findLatestDate(dates) {
@@ -216,7 +263,7 @@ function refresh_calendar2(eye_date){
                     var latestdate = findLatestDate(dateArray_for_picker2)
                     console.log("Found latest date is " + latestdate + " setting picker 2 to it")
                     $('#datepicker2').datepicker('setDate', new Date(latestdate));
-                    console.log("current eye date is " + eye_date)
+                    console.log("current base date is " + eye_date)
                     add_wildfire_predicted_geotiff(reformat_eye_date_str, latestdate)
                 }
             });
@@ -244,11 +291,11 @@ function refresh_calendar(){
         refresh_calendar2(eyedate_str)
     });
 
-  // Fetch the CSV file
-  fetch('../wildfire_site/data/eye_date_list.csv', {
-    method: 'GET',
-    cache: 'no-store', // 'no-store' disables caching
-  })
+    // Fetch the CSV file
+    fetch('../wildfire_site/data/eye_date_list.csv', {
+        method: 'GET',
+        cache: 'no-store', // 'no-store' disables caching
+    })
     .then(response => response.text())
     .then(data => {
         console.log(data)
@@ -280,7 +327,7 @@ function refresh_calendar(){
 
                 // found the latest date and show on the map
                 var latestdate = findLatestDate(dateArray_for_picker1)
-                console.log("Found latest eye date is " + latestdate + "setting picker1 to it")
+                console.log("Found latest base date is " + latestdate + "setting picker1 to it")
                 $('#datepicker1').datepicker('setDate', new Date(latestdate));
                 $('#datepicker1').datepicker('update');
                 refresh_calendar2(latestdate)
@@ -294,17 +341,19 @@ function refresh_calendar(){
     
 }
 
+function load_predicted_frp_to_map(){
+    // Get the selected date from the datepicker
+    var eyeDate = $('#datepicker1').datepicker('getFormattedDate');
+    var selectedDate = $('#datepicker2').datepicker('getFormattedDate');
+    console.log("loading layer for "+ selectedDate)
+    // Show overlay with selected date
+    add_wildfire_predicted_geotiff(eyeDate, selectedDate);
+}
+
 function add_listener_to_buttons(){
 
     // Button click listener
-    $('#load_wildfire_to_map').on('click', function() {
-        // Get the selected date from the datepicker
-        var eyeDate = $('#datepicker1').datepicker('getFormattedDate');
-        var selectedDate = $('#datepicker2').datepicker('getFormattedDate');
-        console.log("loading layer for "+ selectedDate)
-        // Show overlay with selected date
-        add_wildfire_predicted_geotiff(eyeDate, selectedDate);
-    });
+    $('#load_wildfire_to_map').on('click', load_predicted_frp_to_map);
 
     // Close overlay button click listener
     $('#download_wildfire_geotiff').on('click', function() {
@@ -315,6 +364,11 @@ function add_listener_to_buttons(){
         no_dash_date = remove_dash_in_date_str(eyeDate)
         // Open a new window to initiate the download
         window.open("../wildfire_site/data/"+no_dash_date+"/firedata_"+no_dash_date+"_predicted.txt_output.tif", '_blank');
+    });
+
+    $('#datepicker2').datepicker().on("changeDate", function(selected) {
+        load_predicted_frp_to_map();
+        $(this).datepicker('hide');
     });
 
 }
@@ -393,12 +447,130 @@ function add_legend(){
     legend.addTo(map);
 }
 
+function add_folder_picker(){
+    $("#folderpicker").on("click", function(){
+        
+    })
+}
+
+function parseCSVToJSON(csvData) {
+    let folderMap = {};
+
+    let lines = csvData.trim().split("\n");
+
+    lines.forEach(line => {
+        let [folder, eyeDate, forecastFile] = line.split(",");
+        let forecastDate = forecastFile.match(/_(\d{8})_/)[1]; // Extract date from filename
+
+        if (!folderMap[folder]) {
+            folderMap[folder] = {};
+        }
+        if (!folderMap[folder][eyeDate]) {
+            folderMap[folder][eyeDate] = [];
+        }
+
+        folderMap[folder][eyeDate].push(forecastDate);
+    });
+
+    return folderMap;
+}
+
+var FC = {
+    global_folder_data_mapper: {}
+}
+
+function refresh_folderlist(){
+    fetch('../wildfire_site/data/map_folder_dates.csv', {
+    // fetch('test_map_folder_dates.csv', {
+        method: 'GET',
+        cache: 'no-store', // 'no-store' disables caching
+    })
+    .then(response => response.text())
+    .then(data => {
+        FC.global_folder_data_mapper = parseCSVToJSON(data)
+        console.log(FC.global_folder_data_mapper)
+        populateFolderPicker(FC.global_folder_data_mapper);
+    })
+}
+
+// Function to populate folder picker
+function populateFolderPicker(folderMap) {
+    var folderPicker = $('#folderpicker');
+    folderPicker.empty(); // Clear previous options
+
+    let folders = Object.keys(folderMap);
+
+
+    if (folders.length === 0) return;
+
+    folders.forEach((folder, index) => {
+        var option = $('<option>', {
+            value: folder,
+            text: folder
+        });
+
+        if (index === 0) {
+            option.attr("selected", "selected"); // Select the first one by default
+        }
+
+        folderPicker.append(option);
+    });
+
+    // Trigger an event to update dependent elements when a folder is selected
+    folderPicker.trigger('change');
+}
+
+function setup_folder_picker() {
+    var folderOptions = []; // This is an example. Dynamically populate as needed.
+
+    var folderPicker = $('#folderpicker');
+    folderOptions.forEach(function(folder) {
+        var option = $('<option>', {
+            value: folder,
+            text: folder
+        });
+        folderPicker.append(option);
+    });
+
+    // Handle folder selection
+    folderPicker.on('change', function() {
+        var selectedFolder = $(this).val();
+        console.log("Folder selected: " + selectedFolder);
+        // Add any functionality you'd like when a folder is selected.
+        populate_datepicker1(selectedFolder)
+    });
+}
+
+function populate_datepicker1(selected_folder){
+    var available_base_dates = FC.global_folder_data_mapper[selected_folder]
+    // Extract keys from the object and store them in an array
+    var keysArray = Object.keys(available_base_dates);
+    keysArray.sort((a, b) => b.localeCompare(a));
+    console.log("date picker 1 list of dates: " + keysArray)
+    setup_datepicker("datepicker1", keysArray, keysArray[0])
+    populate_datepicker2(selected_folder, keysArray[0])
+}
+
+function populate_datepicker2(selected_folder, base_date){
+    var available_forecasting_dates = FC.global_folder_data_mapper[selected_folder][base_date]
+    available_forecasting_dates.sort((a, b) => b.localeCompare(a));
+    console.log("date picker 2 list of dates: " + available_forecasting_dates)
+    setup_datepicker("datepicker2", available_forecasting_dates, available_forecasting_dates[0])
+    
+}
+
 // Automatically load the map when the document is ready
 document.addEventListener('DOMContentLoaded', function() {
     loadMap();
-    setup_datepicker2()
-    setup_datepicker1()
-    refresh_calendar()
+    setup_datepicker("datepicker1", [], null);
+    setup_datepicker("datepicker2", [], null);
+    setup_folder_picker()
+    // setup_datepicker2()
+    // setup_datepicker1()
+    refresh_folderlist()
+    // refresh_calendar()
     add_listener_to_buttons()
     add_legend()
+    // trigger the load
+    load_predicted_frp_to_map()
 });
