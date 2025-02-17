@@ -79,6 +79,29 @@ function loadMap() {
     });
 }
 
+// Function to copy coordinates to clipboard
+function copyCoordinates(lat, lon) {
+    const textToCopy = `${lat}, ${lon}`;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => {
+                alert('Coordinates copied to clipboard!');
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+    } else {
+        // Fallback for older browsers
+        var tempInput = document.createElement('input');
+        tempInput.value = textToCopy;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        alert('Coordinates copied to clipboard!');
+    }
+}
+
 function convert_date_str(dateString){
     let dateobj = new Date(dateString);
     let year = dateobj.getFullYear();
