@@ -86,10 +86,10 @@ function loadMap() {
         for(var i=0;i<visible_layers.length;i++){
             // Get the WMS GetFeatureInfo data for the clicked location
             getWmsFeatureInfoForLayer(lat, lon, visible_layers[i], function(error, parsedData, layer) {
-                console.log(parsedData)
                 var clicked_value = parseWmsFeatureInfo(parsedData)
-                console.log(clicked_value)
-                $("#feature_table").append(`<strong>${layer}:</strong> ${clicked_value}<br>`);
+                if (clicked_value && clicked_value["value_0"]) { 
+                    $("#feature_table").append(`<strong>${layer}:</strong> ${clicked_value["value_0"]}<br>`);
+                }
             });
         }
         
