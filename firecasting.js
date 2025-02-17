@@ -63,65 +63,91 @@ function loadMap() {
         });
         geojsonLayer.addTo(map);
         geojsonLayer.bringToFront(); // Bring the GeoJSON layer to the top
-        layercontrol.addOverlay(wmslayer, "Predicted SWE "+date);
     });
 
-    // Event listener for map clicks
+    // Function to handle the click event and display popup
     map.on('click', function(e) {
         var lat = e.latlng.lat.toFixed(6);
         var lon = e.latlng.lng.toFixed(6);
-        // Get the WMS GetFeatureInfo data for the clicked location
-        getWmsFeatureInfo(lat, lon, function(error, parsedData) {
-            var content;
-            
-            if (error) {
-                content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button><br>`;
-            } else {
-                // Construct content from parsed data
-                content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button><br><strong>Feature Info:</strong><br>`;
-                
-                // Add each key-value pair to the content
-                for (var key in parsedData) {
-                    content += `<strong>${key}:</strong> ${parsedData[key]}<br>`;
-                }
-            }
 
-            // Display the response data or error in the popup
-            L.popup()
-                .setLatLng(e.latlng)
-                .setContent(content)
-                .openOn(map);
-        });
+        var visible_layers = getActiveLayers(map);
+
+        for(var i=0;i<visible_layers.length;i++){
+            // Get the WMS GetFeatureInfo data for the clicked location
+            getWmsFeatureInfo(lat, lon, visible_layers[i], function(error, parsedData) {
+                var content;
+
+                if (error) {
+                    content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button><br><strong>Error fetching data.</strong>`;
+                } else {
+                    // Construct content from parsed data
+                    content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button><br><strong>Feature Info:</strong><br>`;
+                    
+                    // Add each key-value pair to the content
+                    for (var key in parsedData) {
+                        content += `<strong>${key}:</strong> ${parsedData[key]}<br>`;
+                    }
+                }
+
+                // Display the response data or error in the popup
+                L.popup()
+                    .setLatLng(e.latlng)
+                    .setContent(content)
+                    .openOn(map);
+            });
+        }
+        
     });
+
 }
 
-// Function to get WMS GetFeatureInfo request URL and fetch the feature info
-function getWmsFeatureInfo(lat, lon, callback) {
-    var bbox = `${lon - 0.001},${lat - 0.001},${lon + 0.001},${lat + 0.001}`; // Create a bounding box around the clicked location (0.001 degree in all directions)
-    var wmsUrl = '../cgi-bin/mapserv?';
-    var layers = 'wildfiremap';  // List your layers here
-    var styles = '';
+// Function to get active layer names dynamically from the map
+function getActiveLayers(map) {
+    var activeLayers = [];
+    
+    // Loop through all layers on the map and check if they are visible
+    map.eachLayer(function(layer) {
+        if (layer instanceof L.TileLayer) {
+            // If layer is a TileLayer (WMS), check its visibility
+            if (layer.options.visible) {  // Assuming the `visible` option is used to track layer visibility
+                activeLayers.push(layer.options.name);  // Get layer's name
+            }
+        }
+    });
+    
+    return activeLayers;  // Return array of active layer names
+}
+
+// Function to get WMS GetFeatureInfo request URL and fetch the feature info for a specific layer
+function getWmsFeatureInfoForLayer(lat, lon, layer, callback) {
+    // Define bounding box for the clicked location (0.001 degree buffer around the clicked point)
+    var bbox = `${lon - 0.001},${lat - 0.001},${lon + 0.001},${lat + 0.001}`;
+
+    // Layer-specific properties (could be different for each layer)
+    var wmsUrl = '../cgi-bin/mapserv?'; // Adjust to your server URL
+    var map = layer;
+    var styles = '';  // Specify styles for each layer, if any
     var format = 'image/png';
     var version = '1.1.1';
     var srs = 'EPSG:4326';  // Standard coordinate system
     var width = 256;  // Width of the image
     var height = 256;  // Height of the image
-    var infoFormat = 'text/plain'; // Can be changed to 'application/json' for more structured responses
-    
-    // Construct GetFeatureInfo request URL
-    var url = `${wmsUrl}service=WMS&request=GetFeatureInfo&layers=${layers}&styles=${styles}&format=${format}&version=${version}&srs=${srs}&width=${width}&height=${height}&bbox=${bbox}&query_layers=${layers}&info_format=${infoFormat}&x=128&y=128`;  // Use x=128, y=128 for the center of the bounding box
-    
-    // Fetch feature information using the constructed URL
+    var infoFormat = 'text/plain'; // Response format
+
+    // Construct GetFeatureInfo request URL for this specific layer
+    var url = `${wmsUrl}map=${map}&service=WMS&request=GetFeatureInfo&layers=${layer}&styles=${styles}&format=${format}&version=${version}&srs=${srs}&width=${width}&height=${height}&bbox=${bbox}&query_layers=${layer}&info_format=${infoFormat}&x=128&y=128`;
+
+    // Fetch feature information for this layer
     fetch(url)
         .then(response => response.text())  // Adjust according to the 'info_format' (text or JSON)
         .then(data => {
-            // Parse the response text
+            // Parse the response text for this layer
             var parsedData = parseWmsFeatureInfo(data);
-            callback(null, parsedData);  // Call the callback with parsed data
+            callback(null, parsedData, layer);  // Call the callback with parsed data for this layer
         })
         .catch(error => {
-            console.error("Error fetching feature info:", error);
-            callback(error, null);  // Call the callback with error
+            console.error("Error fetching feature info for layer:", error);
+            callback(error, null, layer);  // Call the callback with error for this layer
         });
 }
 
@@ -576,8 +602,8 @@ var FC = {
 }
 
 function refresh_folderlist(){
-    fetch('../wildfire_site/data/map_folder_dates.csv', {
-    // fetch('test_map_folder_dates.csv', {
+    // fetch('../wildfire_site/data/map_folder_dates.csv', {
+    fetch('test_map_folder_dates.csv', {
         method: 'GET',
         cache: 'no-store', // 'no-store' disables caching
     })
