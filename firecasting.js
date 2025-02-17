@@ -78,17 +78,19 @@ function loadMap() {
         content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button><br><strong>Feature Info:</strong><br><div id="`+featureTableId+`"></div>`;
         
         // Display the response data or error in the popup
-        L.popup()
-            .setLatLng(e.latlng)
-            .setContent(content)
-            .openOn(map);
+        var popup = L.popup()
+                    .setLatLng(e.latlng)
+                    .setContent(content)
+                    .openOn(map);
 
         var visible_layers = getActiveLayers(this);
-        
+
         visible_layers.forEach(layer => {
             getWmsFeatureInfoForLayer(lat, lon, layer, function (error, parsedData, layerName) {
                 if (!error && parsedData && parsedData["value_0"]) {
                     $("#"+featureTableId).append(`<strong>${layerName}:</strong> ${parsedData["value_0"]}<br>`);
+                    // **Force the popup to refresh and resize**
+                    popup.setContent(popup.getContent());  
                 }
             });
         });
