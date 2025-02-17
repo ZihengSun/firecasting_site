@@ -70,30 +70,26 @@ function loadMap() {
         var lat = e.latlng.lat.toFixed(6);
         var lon = e.latlng.lng.toFixed(6);
 
-        var visible_layers = getActiveLayers(map);
+        var content;
+
+        // Construct content from parsed data
+        content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button><br><strong>Feature Info:</strong><br><div id="feature_table"></div>`;
+        
+        // Display the response data or error in the popup
+        L.popup()
+            .setLatLng(e.latlng)
+            .setContent(content)
+            .openOn(map);
+
+        var visible_layers = getActiveLayers(this);
 
         for(var i=0;i<visible_layers.length;i++){
             // Get the WMS GetFeatureInfo data for the clicked location
-            getWmsFeatureInfo(lat, lon, visible_layers[i], function(error, parsedData) {
-                var content;
-
-                if (error) {
-                    content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button><br><strong>Error fetching data.</strong>`;
-                } else {
-                    // Construct content from parsed data
-                    content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button><br><strong>Feature Info:</strong><br>`;
-                    
-                    // Add each key-value pair to the content
-                    for (var key in parsedData) {
-                        content += `<strong>${key}:</strong> ${parsedData[key]}<br>`;
-                    }
-                }
-
-                // Display the response data or error in the popup
-                L.popup()
-                    .setLatLng(e.latlng)
-                    .setContent(content)
-                    .openOn(map);
+            getWmsFeatureInfoForLayer(lat, lon, visible_layers[i], function(error, parsedData, layer) {
+                console.log(parsedData)
+                var clicked_value = parseWmsFeatureInfo(parsedData)
+                console.log(clicked_value)
+                $("#feature_table").append(`<strong>${layer}:</strong> ${clicked_value}<br>`);
             });
         }
         
@@ -109,9 +105,7 @@ function getActiveLayers(map) {
     map.eachLayer(function(layer) {
         if (layer instanceof L.TileLayer) {
             // If layer is a TileLayer (WMS), check its visibility
-            if (layer.options.visible) {  // Assuming the `visible` option is used to track layer visibility
-                activeLayers.push(layer.options.name);  // Get layer's name
-            }
+            activeLayers.push(layer.options.display_name);  // Get layer's name
         }
     });
     
@@ -210,19 +204,24 @@ function add_wildfire_predicted_geotiff(foldername, eyedate, predict_dateString)
         return;
     }
     console.log("adding the layer of prediction of "+predict_dateString + "from base date "+eyedate)
-    
-    // URL to your GeoTIFF file - firedata_20210717_predicted.txt_output.tif
-    var wmslayer = L.tileLayer.wms('http://geobrain.csiss.gmu.edu/cgi-bin/mapserv?'+
-            'map=/var/www/html/wildfire_site/data/'+foldername+'/'+eyedate+'/firedata_'+
-            predict_dateString+'_predicted.txt_output.tif.map&', 
-            {
-                    layers: 'wildfiremap',
-                    format: 'image/png',
-                    transparent: true
-            });
-    wmslayer.addTo(map);
+
     layer_name = "Wildfire Prediction "+foldername + "-" + eyedate +" - "+predict_dateString
     console.log("layer_name = "+layer_name)
+    
+    // URL to your GeoTIFF file - firedata_20210717_predicted.txt_output.tif
+    var wmslayer = L.tileLayer.wms(
+        'http://geobrain.csiss.gmu.edu/cgi-bin/mapserv?'+
+        'map=/var/www/html/wildfire_site/data/'+foldername+'/'+eyedate+'/firedata_'+
+        predict_dateString+'_predicted.txt_output.tif.map&',
+        {
+                layers: 'wildfiremap',
+                format: 'image/png',
+                transparent: true,
+                display_name: layer_name,
+        }
+    );
+    wmslayer.addTo(map);
+    
     layercontrol.addOverlay(wmslayer, layer_name);
 
 }
