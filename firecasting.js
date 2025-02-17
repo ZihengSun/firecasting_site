@@ -83,6 +83,8 @@ function loadMap() {
             .setContent(content)
             .openOn(map);
 
+        var visible_layers = getActiveLayers(this);
+        
         visible_layers.forEach(layer => {
             getWmsFeatureInfoForLayer(lat, lon, layer, function (error, parsedData, layerName) {
                 if (!error && parsedData && parsedData["value_0"]) {
