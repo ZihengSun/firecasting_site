@@ -151,7 +151,7 @@ function getWmsFeatureInfoForLayer(lat, lon, layer, callback) {
     var infoFormat = 'text/plain'; // Response format
 
     // Construct GetFeatureInfo request URL for this specific layer
-    var url = `${wmsUrl}map=${map}&service=WMS&request=GetFeatureInfo&layers=${layer}&styles=${styles}&format=${format}&version=${version}&srs=${srs}&width=${width}&height=${height}&bbox=${bbox}&query_layers=wildfiremap&info_format=${infoFormat}&x=128&y=128`;
+    var url = `${wmsUrl}map=${map}&service=WMS&request=GetFeatureInfo&layers=wildfiremap&styles=${styles}&format=${format}&version=${version}&srs=${srs}&width=${width}&height=${height}&bbox=${bbox}&query_layers=wildfiremap&info_format=${infoFormat}&x=128&y=128`;
 
     // Fetch feature information for this layer
     fetch(url)
