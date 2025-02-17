@@ -70,13 +70,80 @@ function loadMap() {
     map.on('click', function(e) {
         var lat = e.latlng.lat.toFixed(6);
         var lon = e.latlng.lng.toFixed(6);
-        var content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button>`;
+        // Get the WMS GetFeatureInfo data for the clicked location
+        getWmsFeatureInfo(lat, lon, function(error, parsedData) {
+            var content;
+            
+            if (error) {
+                content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button><br>`;
+            } else {
+                // Construct content from parsed data
+                content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button><br><strong>Feature Info:</strong><br>`;
+                
+                // Add each key-value pair to the content
+                for (var key in parsedData) {
+                    content += `<strong>${key}:</strong> ${parsedData[key]}<br>`;
+                }
+            }
 
-        L.popup()
-            .setLatLng(e.latlng)
-            .setContent(content)
-            .openOn(map);
+            // Display the response data or error in the popup
+            L.popup()
+                .setLatLng(e.latlng)
+                .setContent(content)
+                .openOn(map);
+        });
     });
+}
+
+// Function to get WMS GetFeatureInfo request URL and fetch the feature info
+function getWmsFeatureInfo(lat, lon, callback) {
+    var bbox = `${lon - 0.001},${lat - 0.001},${lon + 0.001},${lat + 0.001}`; // Create a bounding box around the clicked location (0.001 degree in all directions)
+    var wmsUrl = 'http://geobrain.csiss.gmu.edu/cgi-bin/mapserv?';
+    var layers = 'wildfiremap';  // List your layers here
+    var styles = '';
+    var format = 'image/png';
+    var version = '1.1.1';
+    var srs = 'EPSG:4326';  // Standard coordinate system
+    var width = 256;  // Width of the image
+    var height = 256;  // Height of the image
+    var infoFormat = 'text/plain'; // Can be changed to 'application/json' for more structured responses
+    
+    // Construct GetFeatureInfo request URL
+    var url = `${wmsUrl}service=WMS&request=GetFeatureInfo&layers=${layers}&styles=${styles}&format=${format}&version=${version}&srs=${srs}&width=${width}&height=${height}&bbox=${bbox}&query_layers=${layers}&info_format=${infoFormat}&x=128&y=128`;  // Use x=128, y=128 for the center of the bounding box
+    
+    // Fetch feature information using the constructed URL
+    fetch(url)
+        .then(response => response.text())  // Adjust according to the 'info_format' (text or JSON)
+        .then(data => {
+            // Parse the response text
+            var parsedData = parseWmsFeatureInfo(data);
+            callback(null, parsedData);  // Call the callback with parsed data
+        })
+        .catch(error => {
+            console.error("Error fetching feature info:", error);
+            callback(error, null);  // Call the callback with error
+        });
+}
+
+// Function to parse WMS GetFeatureInfo response text
+function parseWmsFeatureInfo(response) {
+    // Create a result object to hold the parsed data
+    var result = {};
+    
+    // Regular expression to capture key-value pairs
+    var regex = /([a-zA-Z0-9_]+)\s*=\s*'([^']+)'/g;
+    var match;
+    
+    // Iterate over all matches in the response string
+    while ((match = regex.exec(response)) !== null) {
+        var key = match[1];   // Extract the key
+        var value = match[2]; // Extract the value
+        
+        // Store the key-value pair in the result object
+        result[key] = value;
+    }
+    
+    return result;
 }
 
 // Function to copy coordinates to clipboard
