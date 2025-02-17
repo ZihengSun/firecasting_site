@@ -68,9 +68,9 @@ function loadMap() {
     // Function to handle the click event and display popup
     map.on('click', function(e) {
         var lat = e.latlng.lat.toFixed(6);
-        var lon = e.latlng.lng.toFixed(6);
+        // var lon = e.latlng.lng.toFixed(6);
 
-        lon = ((lon + 180) % 360 + 360) % 360 - 180; // Keeps lon in [-180, 180]
+        var lon = ((e.latlng.lng + 180) % 360 + 360) % 360 - 180;
 
 
         var content;
