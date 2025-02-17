@@ -86,9 +86,9 @@ function loadMap() {
         for(var i=0;i<visible_layers.length;i++){
             // Get the WMS GetFeatureInfo data for the clicked location
             getWmsFeatureInfoForLayer(lat, lon, visible_layers[i], function(error, parsedData, layer) {
-                var clicked_value = parseWmsFeatureInfo(parsedData)
-                if (clicked_value && clicked_value["value_0"]) { 
-                    $("#feature_table").append(`<strong>${layer}:</strong> ${clicked_value["value_0"]}<br>`);
+                // var clicked_value = parseWmsFeatureInfo(parsedData)
+                if (parsedData && parsedData["value_0"]) { 
+                    $("#feature_table").append(`<strong>${layer}:</strong> ${parsedData["value_0"]}<br>`);
                 }
             });
         }
