@@ -105,7 +105,7 @@ function add_wildfire_predicted_geotiff(foldername, eyedate, predict_dateString)
                     transparent: true
             });
     wmslayer.addTo(map);
-    layer_name = "Wildfire Prediction "+ eyedate +" - "+predict_dateString
+    layer_name = "Wildfire Prediction "+foldername + "-" + eyedate +" - "+predict_dateString
     console.log("layer_name = "+layer_name)
     layercontrol.addOverlay(wmslayer, layer_name);
 
