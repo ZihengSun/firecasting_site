@@ -77,23 +77,15 @@ function convert_date_str(dateString){
     return formattedDate
 }
 
-function add_wildfire_predicted_geotiff(eyedate, predict_dateString){
+function add_wildfire_predicted_geotiff(foldername, eyedate, predict_dateString){
     if (!predict_dateString) {
         return;
     }
     console.log("adding the layer of prediction of "+predict_dateString + "from base date "+eyedate)
-    if (eyedate.includes('-')) {
-        // Remove dashes from the original date string
-        eyedate = eyedate.replace(/-/g, '');
-    }
-    if (predict_dateString.includes('-')) {
-        // Remove dashes from the original date string
-        predict_dateString = predict_dateString.replace(/-/g, '');
-    }
     
     // URL to your GeoTIFF file - firedata_20210717_predicted.txt_output.tif
     var wmslayer = L.tileLayer.wms('http://geobrain.csiss.gmu.edu/cgi-bin/mapserv?'+
-            'map=/var/www/html/wildfire_site/data/'+eyedate+'/firedata_'+
+            'map=/var/www/html/wildfire_site/data/'+foldername+'/'+eyedate+'/firedata_'+
             predict_dateString+'_predicted.txt_output.tif.map&', 
             {
                     layers: 'wildfiremap',
@@ -151,8 +143,6 @@ function setup_datepicker(datepicker_id, dateArray_for_picker=[], latest_date_fo
 
             // Check if the formatted date is in the dateArray
             let isin = dateArray_for_picker.includes(formattedDate);
-            if(isin)
-                console.log("Found date turned on" + formattedDate)
             return isin
         }
     }).on("changeDate", function(e) {
@@ -343,11 +333,15 @@ function refresh_calendar(){
 
 function load_predicted_frp_to_map(){
     // Get the selected date from the datepicker
+    var foldername = $("#folderpicker").val()
     var eyeDate = $('#datepicker1').datepicker('getFormattedDate');
     var selectedDate = $('#datepicker2').datepicker('getFormattedDate');
     console.log("loading layer for "+ selectedDate)
+    // Remove slashes to get "yyyymmdd" format
+    var eyeDateFormatted = eyeDate.replace(/\//g, ""); 
+    var selectedDateFormatted = selectedDate.replace(/\//g, "");
     // Show overlay with selected date
-    add_wildfire_predicted_geotiff(eyeDate, selectedDate);
+    add_wildfire_predicted_geotiff(foldername, eyeDateFormatted, selectedDateFormatted);
 }
 
 function add_listener_to_buttons(){
