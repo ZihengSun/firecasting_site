@@ -98,7 +98,7 @@ function loadMap() {
 // Function to get WMS GetFeatureInfo request URL and fetch the feature info
 function getWmsFeatureInfo(lat, lon, callback) {
     var bbox = `${lon - 0.001},${lat - 0.001},${lon + 0.001},${lat + 0.001}`; // Create a bounding box around the clicked location (0.001 degree in all directions)
-    var wmsUrl = 'http://geobrain.csiss.gmu.edu/cgi-bin/mapserv?';
+    var wmsUrl = '../cgi-bin/mapserv?';
     var layers = 'wildfiremap';  // List your layers here
     var styles = '';
     var format = 'image/png';
