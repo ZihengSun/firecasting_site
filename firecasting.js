@@ -88,9 +88,8 @@ function loadMap() {
         visible_layers.forEach(layer => {
             getWmsFeatureInfoForLayer(lat, lon, layer, function (error, parsedData, layerName) {
                 if (!error && parsedData && parsedData["value_0"]) {
-                    $("#"+featureTableId).append(`<strong>${layerName}:</strong> ${parsedData["value_0"]}<br>`);
                     // **Force the popup to refresh and resize**
-                    popup.setContent(popup.getContent());  
+                    popup.setContent(popup.getContent() + `<strong>${layerName}:</strong> ${parsedData["value_0"]}<br>`);  
                 }
             });
         });
