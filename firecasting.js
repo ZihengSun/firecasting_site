@@ -624,8 +624,8 @@ var FC = {
 }
 
 function refresh_folderlist(){
-    // fetch('../wildfire_site/data/map_folder_dates.csv', {
-    fetch('test_map_folder_dates.csv', {
+    fetch('../wildfire_site/data/map_folder_dates.csv', {
+    // fetch('test_map_folder_dates.csv', {
         method: 'GET',
         cache: 'no-store', // 'no-store' disables caching
     })
