@@ -89,7 +89,7 @@ function loadMap() {
             getWmsFeatureInfoForLayer(lat, lon, layer, function (error, parsedData, layerName) {
                 if (!error && parsedData && parsedData["value_0"]) {
                     // **Force the popup to refresh and resize**
-                    popup.setContent(popup.getContent() + `<strong>${layerName}:</strong> ${parsedData["value_0"]}<br>`);  
+                    popup.setContent(popup.getContent() + `<p><strong>${layerName}:</strong> ${parsedData["value_0"]}</p><br>`);  
                 }
             });
         });
