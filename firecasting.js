@@ -97,6 +97,23 @@ function loadMap() {
 
 }
 
+function parseLayerName(layerString) {
+    // Regular expression to capture the main layer name and the two dates
+    var regex = /^(.+?\.pkl)-(\d{8}) - (\d{8})$/;
+    var match = layerString.match(regex);
+
+    if (match) {
+        return {
+            layerName: match[1], // Extracted layer name before the first hyphen-date
+            startDate: match[2], // Convert YYYYMMDD to YYYY-MM-DD
+            endDate: match[3]    // Convert YYYYMMDD to YYYY-MM-DD
+        };
+    } else {
+        console.error("Invalid layer name format:", layerString);
+        return null;
+    }
+}
+
 // Function to get active layer names dynamically from the map
 function getActiveLayers(map) {
     var activeLayers = [];
@@ -105,7 +122,9 @@ function getActiveLayers(map) {
     map.eachLayer(function(layer) {
         if (layer instanceof L.TileLayer) {
             // If layer is a TileLayer (WMS), check its visibility
-            activeLayers.push(layer.options.display_name);  // Get layer's name
+            if (typeof layer.options.display_name !== "undefined") {
+                activeLayers.push(layer.options.display_name);
+            }
         }
     });
     
@@ -117,19 +136,22 @@ function getWmsFeatureInfoForLayer(lat, lon, layer, callback) {
     // Define bounding box for the clicked location (0.001 degree buffer around the clicked point)
     var bbox = `${lon - 0.001},${lat - 0.001},${lon + 0.001},${lat + 0.001}`;
 
+
+    var layer_obj = parseLayerName(layer)
+
     // Layer-specific properties (could be different for each layer)
     var wmsUrl = '../cgi-bin/mapserv?'; // Adjust to your server URL
-    var map = layer;
+    var map = '/var/www/html/wildfire_site/data/'+layer_obj.layerName+'/'+layer_obj.startDate+'/firedata_'+layer_obj.endDate+'_predicted.txt_output.tif.map';
     var styles = '';  // Specify styles for each layer, if any
     var format = 'image/png';
     var version = '1.1.1';
     var srs = 'EPSG:4326';  // Standard coordinate system
-    var width = 256;  // Width of the image
-    var height = 256;  // Height of the image
+    var width = 10;  // Width of the image
+    var height = 10;  // Height of the image
     var infoFormat = 'text/plain'; // Response format
 
     // Construct GetFeatureInfo request URL for this specific layer
-    var url = `${wmsUrl}map=${map}&service=WMS&request=GetFeatureInfo&layers=${layer}&styles=${styles}&format=${format}&version=${version}&srs=${srs}&width=${width}&height=${height}&bbox=${bbox}&query_layers=${layer}&info_format=${infoFormat}&x=128&y=128`;
+    var url = `${wmsUrl}map=${map}&service=WMS&request=GetFeatureInfo&layers=${layer}&styles=${styles}&format=${format}&version=${version}&srs=${srs}&width=${width}&height=${height}&bbox=${bbox}&query_layers=wildfiremap&info_format=${infoFormat}&x=128&y=128`;
 
     // Fetch feature information for this layer
     fetch(url)
@@ -205,7 +227,7 @@ function add_wildfire_predicted_geotiff(foldername, eyedate, predict_dateString)
     }
     console.log("adding the layer of prediction of "+predict_dateString + "from base date "+eyedate)
 
-    layer_name = "Wildfire Prediction "+foldername + "-" + eyedate +" - "+predict_dateString
+    layer_name = foldername + "-" + eyedate +" - "+predict_dateString
     console.log("layer_name = "+layer_name)
     
     // URL to your GeoTIFF file - firedata_20210717_predicted.txt_output.tif
