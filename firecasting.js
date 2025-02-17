@@ -65,6 +65,18 @@ function loadMap() {
         geojsonLayer.bringToFront(); // Bring the GeoJSON layer to the top
         layercontrol.addOverlay(wmslayer, "Predicted SWE "+date);
     });
+
+    // Event listener for map clicks
+    map.on('click', function(e) {
+        var lat = e.latlng.lat.toFixed(6);
+        var lon = e.latlng.lng.toFixed(6);
+        var content = `<strong>Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lon}<br><button onclick="copyCoordinates('${lat}', '${lon}')">Copy Coordinates</button>`;
+
+        L.popup()
+            .setLatLng(e.latlng)
+            .setContent(content)
+            .openOn(map);
+    });
 }
 
 function convert_date_str(dateString){
